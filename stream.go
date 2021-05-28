@@ -72,6 +72,7 @@ type Job struct {
 	Hash    string
 	Time    time.Time
 	Version Version
+	GitHash string
 }
 
 func (j *Job) MarshalJSON() (b []byte, err error) {
@@ -94,6 +95,11 @@ func (j *Job) MarshalJSON() (b []byte, err error) {
 		c, _ = j.Version.MarshalJSON()
 		buf.Write(c)
 	}
+	if j.GitHash != "" {
+		buf.WriteString(`,"GitHash":`)
+		c, _ = json.Marshal(j.GitHash)
+		buf.Write(c)
+	}
 	buf.WriteString(`}`)
 	return buf.Bytes(), nil
 }
@@ -106,6 +112,7 @@ func (j *Job) UnmarshalJSON(b []byte) error {
 		Hash    string
 		Time    time.Time
 		Version Version
+		GitHash string
 	}
 	job := jJob{}
 	if err := json.Unmarshal(b, &job); err != nil {
@@ -119,6 +126,7 @@ func (j *Job) UnmarshalJSON(b []byte) error {
 	j.Hash = job.Hash
 	j.Time = job.Time
 	j.Version = job.Version
+	j.GitHash = job.GitHash
 	return nil
 }
 

@@ -40,7 +40,7 @@ const parserGrammar = `` +
 	//     \nRevert Build version-0123456789abcdef at 1/2/2006 3:04:05 PM...
 	// Git hash (2021/5/24):
 	//     \nNew Build version-0123456789abcdef at 1/2/2006 3:04:05 PM, file version: 0, 123, 1, 12345, git hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ...
-	`(?:(?:^|\r?\n)?(New|Revert) (\w+) (.*?) at (\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} (?:A|P)M)(?:, file vers?ion: (\d+, \d+, \d+, \d+))?(?:, git hash: [0-9a-fA-F]+ )?... ?)` +
+	`(?:(?:^|\r?\n)?(New|Revert) (\w+) (.*?) at (\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} (?:A|P)M)(?:, file vers?ion: (\d+, \d+, \d+, \d+))?(?:, git hash: ([0-9a-fA-F]+) )?... ?)` +
 	// Status (unchanged):
 	//     Done!\n
 	//     Error!\n
@@ -98,10 +98,13 @@ func Lex(b []byte) (s Stream) {
 					goto parseRaw
 				}
 			}
+			if r[12] >= 0 {
+				job.GitHash = string(b[i+r[12] : i+r[13]])
+			}
 			s = append(s, &job)
-		} else if r[12] >= 0 {
+		} else if r[14] >= 0 {
 			// Status message.
-			status := Status(b[i+r[12] : i+r[13]])
+			status := Status(b[i+r[14] : i+r[15]])
 			s = append(s, &status)
 		}
 		goto next
