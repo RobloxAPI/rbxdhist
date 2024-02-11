@@ -47,23 +47,21 @@ const parserGrammar = `` +
 
 var streamParser = regexp.MustCompile(parserGrammar)
 
-var zonePST *time.Location
-
-func ZonePST() *time.Location {
-	return zonePST
-}
-
-//go:generate sh unzip -p $GOROOT/lib/time/zoneinfo.zip America/Los_Angeles | gobake -decl=const -name=zonePSTData -output=zone.go
-
-func init() {
-	var err error
-	if zonePST, err = time.LoadLocationFromTZData("America/Los_Angeles", []byte(zonePSTData)); err != nil {
-		panic(err)
-	}
-}
+// Specifies the location to use when parsing dates. If nil, the assumed
+// location will be "America/Los_Angeles", which is loaded according to
+// time.LoadLocation. If an error occurs, then times will be parsed as local.
+var TimeZone *time.Location = nil
 
 // Lex processes a stream of bytes into a stream of tokens.
 func Lex(b []byte) (s Stream) {
+	zonePST := TimeZone
+	if zonePST == nil {
+		var err error
+		zonePST, err = time.LoadLocation("America/Los_Angeles")
+		if err != nil {
+			zonePST, _ = time.LoadLocation("Local")
+		}
+	}
 	for i := 0; i < len(b); {
 		r := streamParser.FindSubmatchIndex(b[i:])
 		if len(r) == 0 || r[1] < 0 {
