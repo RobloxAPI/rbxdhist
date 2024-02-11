@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/robloxapi/rbxdhist?status.png)](https://godoc.org/github.com/robloxapi/rbxdhist)
+[![Go Reference](https://pkg.go.dev/badge/github.com/robloxapi/rbxdhist.svg)](https://pkg.go.dev/github.com/robloxapi/rbxdhist)
 
 # rbxdhist
 
