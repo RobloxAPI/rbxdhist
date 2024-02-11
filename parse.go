@@ -1,5 +1,5 @@
-// The rbxdhist package is used to parse logs involving the deployment of
-// Roblox builds.
+// The rbxdhist package is used to parse logs involving the deployment of Roblox
+// builds.
 package rbxdhist
 
 import (
@@ -9,24 +9,23 @@ import (
 
 // Notes about build process (as deduced by examining the log file)
 //
-// When a job starts (New/Revert), it writes a message to the log file
-// with the current time (time indicates when job starts). When the job
-// finishes (Done) or fails (Error), it writes this status to the file. A
-// job may be canceled, in which case no status is written. The Revert
-// message indicates which version is reverted to.
+// When a job starts (New/Revert), it writes a message to the log file with the
+// current time (time indicates when job starts). When the job finishes (Done)
+// or fails (Error), it writes this status to the file. A job may be canceled,
+// in which case no status is written. The Revert message indicates which
+// version is reverted to.
 //
-// If multiple jobs start at the same time, they can inadvertently write
-// to the file out of order (occurs on 2017/1/5). This is why status
-// messages are separated from job messages. There is also at least one
-// status message that does not seem to match any job message.
+// If multiple jobs start at the same time, they can inadvertently write to the
+// file out of order (occurs on 2017/1/5). This is why status messages are
+// separated from job messages. There is also at least one status message that
+// does not seem to match any job message.
 //
-// There is one case of an irregular job message being emitted
-// (2012/6/29). Because the message occurs only once, it is not included
-// as a standard message, instead being parsed as a raw token.
+// There is one case of an irregular job message being emitted (2012/6/29).
+// Because the message occurs only once, it is not included as a standard
+// message, instead being parsed as a raw token.
 //
-// Job messages have changed in style over time. To justify the complex
-// regexp, these changes are documented below (\n: newline, \s: trailing
-// space).
+// Job messages have changed in style over time. To justify the complex regexp,
+// these changes are documented below (\n: newline, \s: trailing space).
 const parserGrammar = `` +
 	// Original style message:
 	//     New Build version-0123456789abcdef at 1/2/2006 3:04:05 PM...\s
