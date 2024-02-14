@@ -5,6 +5,8 @@ package rbxdhist
 import (
 	"regexp"
 	"time"
+
+	"github.com/robloxapi/rbxver"
 )
 
 // Notes about build process (as deduced by examining the log file)
@@ -90,8 +92,7 @@ func Lex(b []byte) (s Stream) {
 				goto parseRaw
 			}
 			if r[10] >= 0 {
-				var ok bool
-				if job.Version, ok = VersionFromString(string(b[i+r[10] : i+r[11]])); !ok {
+				if job.Version = rbxver.Parse(string(b[i+r[10]:i+r[11]]), rbxver.Any); job.Version.Format == rbxver.Any {
 					goto parseRaw
 				}
 			}

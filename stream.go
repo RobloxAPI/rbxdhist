@@ -3,9 +3,9 @@ package rbxdhist
 import (
 	"bytes"
 	"encoding/json"
-	"regexp"
-	"strconv"
 	"time"
+
+	"github.com/robloxapi/rbxver"
 )
 
 type Stream []Token
@@ -33,7 +33,7 @@ func (s *Stream) UnmarshalJSON(b []byte) error {
 		Build   string
 		GUID    string
 		Time    time.Time
-		Version Version
+		Version rbxver.Version
 		Value   string
 	}
 	var stream jStream
@@ -72,7 +72,7 @@ type Job struct {
 	Build   string
 	GUID    string
 	Time    time.Time
-	Version Version
+	Version rbxver.Version
 	GitHash string
 }
 
@@ -93,7 +93,7 @@ func (j *Job) MarshalJSON() (b []byte, err error) {
 	buf.WriteString(`,"Time":`)
 	c, _ = j.Time.MarshalJSON()
 	buf.Write(c)
-	if !j.Version.Empty() {
+	if j.Version != (rbxver.Version{}) {
 		buf.WriteString(`,"Version":`)
 		c, _ = j.Version.MarshalJSON()
 		buf.Write(c)
@@ -114,7 +114,7 @@ func (j *Job) UnmarshalJSON(b []byte) error {
 		Build   string
 		GUID    string
 		Time    time.Time
-		Version Version
+		Version rbxver.Version
 		GitHash string
 	}
 	job := jJob{}
@@ -131,90 +131,6 @@ func (j *Job) UnmarshalJSON(b []byte) error {
 	j.Version = job.Version
 	j.GitHash = job.GitHash
 	return nil
-}
-
-type Version struct {
-	Major, Minor, Maint, Build int
-}
-
-var versionGrammar = regexp.MustCompile(`` +
-	`^(\d+)\.(\d+)\.(\d+)\.(\d+)$` +
-	`|^(\d+), (\d+), (\d+), (\d+)$`,
-)
-
-func VersionFromString(s string) (v Version, ok bool) {
-	r := versionGrammar.FindStringSubmatch(s)
-	if r[0] != "" {
-		if r[1] != "" {
-			v.Major, _ = strconv.Atoi(r[1])
-			v.Minor, _ = strconv.Atoi(r[2])
-			v.Maint, _ = strconv.Atoi(r[3])
-			v.Build, _ = strconv.Atoi(r[4])
-			return v, true
-		} else if r[5] != "" {
-			v.Major, _ = strconv.Atoi(r[5])
-			v.Minor, _ = strconv.Atoi(r[6])
-			v.Maint, _ = strconv.Atoi(r[7])
-			v.Build, _ = strconv.Atoi(r[8])
-			return v, true
-		}
-	}
-	return v, false
-}
-
-func (v Version) Empty() bool {
-	return v.Major == 0 && v.Minor == 0 && v.Maint == 0 && v.Build == 0
-}
-
-func (a Version) Compare(b Version) int {
-	switch {
-	case a.Major < b.Major:
-		return -1
-	case a.Major > b.Major:
-		return 1
-	case a.Minor < b.Minor:
-		return -1
-	case a.Minor > b.Minor:
-		return 1
-	case a.Maint < b.Maint:
-		return -1
-	case a.Maint > b.Maint:
-		return 1
-	case a.Build < b.Build:
-		return -1
-	case a.Build > b.Build:
-		return 1
-	}
-	return 0
-}
-
-func (v Version) MarshalJSON() (b []byte, err error) {
-	b = append(b, '"')
-	b = strconv.AppendUint(b, uint64(v.Major), 10)
-	b = append(b, '.')
-	b = strconv.AppendUint(b, uint64(v.Minor), 10)
-	b = append(b, '.')
-	b = strconv.AppendUint(b, uint64(v.Maint), 10)
-	b = append(b, '.')
-	b = strconv.AppendUint(b, uint64(v.Build), 10)
-	b = append(b, '"')
-	return b, nil
-}
-
-func (v *Version) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
-	*v, _ = VersionFromString(s)
-	return nil
-}
-
-func (v Version) String() string {
-	return strconv.Itoa(v.Major) +
-		"." + strconv.Itoa(v.Minor) +
-		"." + strconv.Itoa(v.Maint) +
-		"." + strconv.Itoa(v.Build)
 }
 
 type Status string
